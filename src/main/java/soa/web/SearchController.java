@@ -24,18 +24,21 @@ public class SearchController {
 
     @RequestMapping(value="/search")
     @ResponseBody
-    public Object search(@RequestParam("q") String q) {
-        // save the "limit" restriction of the RequestParam  into a [limitCount] variable
-        int indexMax = q.indexOf("max");
-        String limitString = q.substring(indexMax);
-        String[] limit = limitString.split(":");
-        limitString = limit[1];
-        Integer limitCount = Integer.parseInt(limitString);
-        // save the query of the RequestParam into a [q] variable
-        q = q.substring(0,indexMax);
+    public Object search(@RequestParam("q") String query, @RequestParam("max") String max,
+                         @RequestParam("lang") String lang) {
         Map<String,Object> headers = new HashMap<String,Object>();
-        headers.put("CamelTwitterKeywords",q);
-        headers.put("CamelTwitterCount",limitCount);
+        headers.put("CamelTwitterKeywords",query);
+
+        // check the max RequestParam
+        if (!max.isEmpty()) {
+            Integer limitCount = Integer.parseInt(max);
+            headers.put("CamelTwitterCount",limitCount);
+        }
+        // check the max RequestParam
+        if (!lang.isEmpty()) {
+            headers.put("CamelTwitterSearchLanguage", lang);
+        }
+
         return producerTemplate.requestBodyAndHeaders("direct:search", "", headers);
     }
 }
